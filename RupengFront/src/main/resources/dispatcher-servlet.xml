@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" 
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                        http://www.springframework.org/schema/beans/spring-beans.xsd  
+                        http://www.springframework.org/schema/mvc 
+                        http://www.springframework.org/schema/mvc/spring-mvc.xsd 
+                        http://www.springframework.org/schema/context 
+                        http://www.springframework.org/schema/context/spring-context.xsd 
+                        http://www.springframework.org/schema/aop 
+                        http://www.springframework.org/schema/aop/spring-aop.xsd 
+                        http://www.springframework.org/schema/tx 
+                        http://www.springframework.org/schema/tx/spring-tx.xsd">
+                        
+    <!-- 配置扫描spring注解时扫描的包，同时也开启了spring注解支持 -->
+    <context:component-scan base-package="com.rupeng.web" />
+
+    <!-- 开启springMVC相关注解支持 -->
+    <mvc:annotation-driven />
+    
+    <!-- 开启spring AOP 注解支持 -->
+    <aop:aspectj-autoproxy/>
+    <!-- aspect类和被增强的类要由同一个spring容器处理 -->
+    <bean class="com.rupeng.web.aop.LogAspect"></bean>
+
+    <!-- 约定大于配置：约定视图页面的全路径 = prefix + viewName + suffix -->
+    <bean
+        class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/jsp/"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+    <!-- 验证器 -->
+    <bean id="validator"
+        class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+        <property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+        <!-- 默认使用classpath下的 ValidationMessages.properties -->
+        <!-- <property name="validationMessageSource" ref="validationMessageSource"/> -->
+    </bean>
+
+    <!-- 文件上传解析器 -->
+    <bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="104857600" />
+        <property name="defaultEncoding" value="UTF-8" />
+        <property name="maxInMemorySize" value="40960" />
+    </bean>
+    
+    <mvc:interceptors>  
+        <!-- 自动登录拦截器先配置 -->
+        <mvc:interceptor>
+            <mvc:mapping path="/" />
+            <mvc:mapping path="/user/*" />
+            <mvc:mapping path="/card/*" />
+            <mvc:mapping path="/segment/*" />
+            <mvc:mapping path="/notification/*" />
+            <mvc:mapping path="/question/*" />
+            <mvc:exclude-mapping path="/user/login.do"/>
+            <mvc:exclude-mapping path="/user/register.do"/>
+            <bean class="com.rupeng.web.interceptor.AutoLoginInterceptor" />
+        </mvc:interceptor>
+        
+    </mvc:interceptors>
+
+    <!-- 资源映射 -->
+    <mvc:resources location="/css/" mapping="/css/**" />
+    <mvc:resources location="/js/" mapping="/js/**" />
+    <mvc:resources location="/images/" mapping="/images/**" />
+    <mvc:resources location="/lib/" mapping="/lib/**" />
+    <mvc:resources location="/audios/" mapping="/audios/**" />
+    <mvc:resources location="/videos/" mapping="/videos/**" />
+</beans>
